@@ -1,0 +1,3018 @@
+#Main.dart
+import 'package:flutter/material.dart';
+import 'package:schoolapp/signupscreen.dart';
+import 'package:schoolapp/splash.dart';
+import 'package:schoolapp/student.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+void main() async {
+  await Supabase.initialize(
+    url: 'https://ggjbgmknfntuwxdoocjw.supabase.co',
+    anonKey: 'sb_publishable_4v3NQBAzbYkEvBHDTUkj6w_SL4GQ_pB',
+  );
+  runApp(Routing());
+}
+
+class Routing extends StatelessWidget {
+  const Routing({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(debugShowCheckedModeBanner: false, home: Splash());
+  }
+}
+
+#Splash.dart
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:schoolapp/signupscreen.dart';
+class SplashScreen extends StatefulWidget {
+  @override
+  _SplashScreenState createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    Timer(
+      Duration(seconds: 10),
+          () => Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => Signupscreen()),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        children: [
+         Image(
+           height: MediaQuery.sizeOf(context).height,
+             width: MediaQuery.sizeOf(context).width,
+             fit: BoxFit.cover,
+             image: AssetImage('assets/redschool.webp')),
+          Positioned(
+            bottom: 40,
+            left: 0,
+            right: 20,
+            child: Column(
+              children: [
+                Text(
+                  'THE SMART',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.black54,
+                    shadows: [
+                      Shadow(blurRadius: 20, color: Colors.red, offset: Offset(1, 1)),
+                     ],
+                  ),
+                ),
+                Text(
+                  ' SCHOOL',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.black54,
+                    letterSpacing: 2,
+                    shadows: [
+                      Shadow(blurRadius: 20, color: Colors.red, offset: Offset(1, 1)),
+                    ],
+                  ),
+                ),
+                Text(
+                  'Start Learing From Today',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.black54,
+                    letterSpacing: 2,
+                    shadows: [
+                      Shadow(blurRadius: 20, color: Colors.red, offset: Offset(1, 1)),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 10,),
+                CircularProgressIndicator(
+                  color: Colors.black,
+                )
+              ],
+            ),
+          ),
+
+
+          Positioned(
+            top: 50,
+            left: 0,
+            right: 10,
+            child: Column(
+              children: [
+                Text(
+                  'Ume Farwa',
+                  style: TextStyle(
+                    fontSize: 30,
+                    color: Colors.black54,
+                    fontFamily: 'font1',
+                    shadows: [Shadow(
+                      blurRadius: 20, color: Colors.red, offset:
+                    Offset(1, 2)
+                    ),
+                    ]
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  '2023_ag_7205',
+                  style: TextStyle(
+                    fontSize: 23,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black54,
+                    fontFamily: 'font1',
+                      shadows: [Shadow(
+                      blurRadius: 20, color: Colors.red, offset:
+                  Offset(1, 1),
+                  ),
+                  ]),
+                ),
+
+
+              ],
+            ),
+          ),
+        ],
+
+      ),
+    );
+  }
+}
+#SignupScreen.dart
+import 'package:flutter/material.dart';
+import 'package:schoolapp/loginscreen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+
+class Signupscreen extends StatefulWidget {
+  const Signupscreen({super.key});
+  @override
+  State<Signupscreen> createState() => _SignupscreenState();
+}
+class _SignupscreenState extends State<Signupscreen> {
+
+  final emailtext = TextEditingController();
+  final passwordtext = TextEditingController();
+  bool flag = false;
+  final supabase = Supabase.instance.client;
+  Future<void> loginfunction() async {
+    setState(() {
+      flag = true;
+    });
+    try {
+      final result = await supabase.auth.signUp(
+        email: emailtext.text.trim(),
+        password: passwordtext.text.trim(),
+      );
+      if (result.user != null) {
+        await supabase.from('users').insert({
+          'email': emailtext.text.trim(),
+          'role': 'user',
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Sign Up Successful!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+         Navigator.pushAndRemoveUntil(
+           context,
+           MaterialPageRoute(builder: (context) => Loginscreen()),
+               (context) => false,
+         );
+      }
+
+    } catch (e) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: Colors.red,
+        ),
+      );
+
+    } finally {
+
+      setState(() {
+        flag = false;
+      });
+
+    }
+  }
+
+  @override
+  void dispose() {
+    emailtext.dispose();
+    passwordtext.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    return Scaffold(
+
+      backgroundColor: Colors.blue.shade50,
+
+      appBar: AppBar(
+        backgroundColor: Colors.green.shade100,
+        centerTitle: true,
+
+        title: Text(
+          'Sign Up',
+          style: TextStyle(
+            fontFamily: 'font2',
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: Colors.black54,
+          ),
+        ),
+      ),
+
+      body: Stack(
+        children: [
+          Image(
+            height: MediaQuery.sizeOf(context).height,
+              width: MediaQuery.sizeOf(context).width,
+              fit: BoxFit.cover,
+              image: AssetImage('assets/lightyellow.jpg')),
+          Center(
+            child: Container(
+              height: MediaQuery.sizeOf(context).height*0.6,
+              width: MediaQuery.sizeOf(context).width*0.85,
+
+              margin: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white70,
+                  borderRadius: BorderRadius.circular(20)),
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                
+                  child: Column(
+                
+                    children: [
+                
+                      SizedBox(height: 30),
+                
+                      CircleAvatar(
+                        radius: 40,
+                        backgroundColor: Colors.green.shade100,
+                
+                        child: Icon(
+                          Icons.person,
+                          size: 50,
+                          color: Colors.black54,
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      TextField(
+                        style: TextStyle(fontFamily: 'font2'),
+                        controller: emailtext,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.email,
+                              color: Colors.black54),
+                          hintText: 'Enter Email',
+                
+                          filled: true,
+                          fillColor: Colors.white70,
+                
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      TextField(
+                        style: TextStyle(fontFamily: 'font2'),
+                        controller: passwordtext,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.lock,
+                              color: Colors.black54),
+                          hintText: 'Enter Password',
+                          filled: true,
+                          fillColor: Colors.white,
+                
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+
+                          ),
+                        ),
+                      ),
+                
+                      SizedBox(height: 20),
+                      flag
+                          ? CircularProgressIndicator(
+                        color: Colors.black54,
+                      )
+                          : SizedBox(
+                        width: double.infinity,
+                        height: 40,
+                        child: ElevatedButton(
+                
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green.shade100,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              loginfunction();
+                            });
+                          },
+                          child: Text(
+                            'Sign Up',
+                            style: TextStyle(
+                              fontFamily: 'font2',
+                              fontSize: 20,
+                              color: Colors.black54,
+                            ),
+                          ),
+                        ),
+                      ),
+                
+                      SizedBox(height: 20),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>Loginscreen(),
+                            ),
+                
+                          );
+                        },
+                       child: Text(
+                         "Already have Account?LogIn",
+                         style: TextStyle(color: Colors.black,
+                         fontFamily: 'font2',
+                         fontSize: 15),
+                       ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          )
+        ],
+      )
+    );
+  }
+}
+
+#Login.dart
+import 'package:flutter/material.dart';
+import 'package:schoolapp/admin.dart';
+import 'package:schoolapp/homescreen.dart';
+import 'package:schoolapp/signupscreen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+class Loginscreen extends StatefulWidget {
+  const Loginscreen({super.key});
+  @override
+  State<Loginscreen> createState() => _LoginscreenState();
+}
+class _LoginscreenState extends State<Loginscreen> {
+  final emailtext = TextEditingController();
+  final passwordtext = TextEditingController();
+  bool flag = false;
+  final supabaselogin = Supabase.instance.client;
+  Future<void> loginfunction() async {
+    setState(() {
+      flag = true;
+    });
+    try {
+      final result = await supabaselogin.auth.signInWithPassword(
+        email: emailtext.text.trim(),
+        password: passwordtext.text.trim(),
+      );
+      final user = result.user;
+      if (user != null) {
+        final data = await supabaselogin
+            .from('users')
+            .select('role')
+            .eq('email', emailtext.text.trim())
+            .single();
+        String role = data['role'];
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Login Successful'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        setState(() {
+          flag = false;
+        });
+        if (role == "admin") {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => Admin()),
+            (context) => false,
+          );
+        } else {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => Homescreen()),
+            (context) => false,
+          );
+        }
+      }
+    } catch (e) {
+      setState(() {
+        flag = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+      );
+    }
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.green.shade100,
+        centerTitle: true,
+        title: Text(
+          'Login',
+          style: TextStyle(
+            fontSize: 30,
+            fontWeight: FontWeight.bold,
+            color: Colors.black54,
+            fontFamily: 'font2',
+          ),
+        ),
+      ),
+      body: Stack(
+        children: [
+          Image(
+            height: MediaQuery.sizeOf(context).height,
+            width: MediaQuery.sizeOf(context).width,
+            image: AssetImage('assets/lightyellow.jpg'),
+            fit: BoxFit.cover,
+          ),
+          Center(
+            child: Container(
+              margin: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                color: Colors.white70,
+              ),
+              height: MediaQuery.sizeOf(context).height * 0.6,
+              width: MediaQuery.sizeOf(context).width * 0.85,
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+
+                  child: Column(
+                    children: [
+                      SizedBox(height: 30),
+
+                      CircleAvatar(
+                        radius: 50,
+                        backgroundColor: Colors.green.shade100,
+
+                        child: Icon(
+                          Icons.lock,
+                          size: 50,
+                          color: Colors.black54,
+                        ),
+                      ),
+                      SizedBox(height: 30),
+                      TextField(
+                        style: TextStyle(fontFamily: 'font2'),
+                        controller: emailtext,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.email, color: Colors.black54),
+                          hintText: 'Enter Email',
+                          filled: true,
+                          fillColor: Colors.green.shade50,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      TextField(
+                        style: TextStyle(fontFamily: 'font2'),
+                        controller: passwordtext,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.lock, color: Colors.black54),
+                          hintText: 'Enter Password',
+                          filled: true,
+                          fillColor: Colors.green.shade50,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 30),
+                      flag
+                          ? CircularProgressIndicator(color: Colors.black54)
+                          : SizedBox(
+                              width: double.infinity,
+                              height: 55,
+
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green.shade100,
+                                ),
+
+                                onPressed: () {
+                                  setState(() {
+                                    loginfunction();
+                                  });
+                                },
+                                child: Text(
+                                  'Login',
+                                  style: TextStyle(
+                                    fontSize: 25,
+                                    color: Colors.black54,
+                                    fontFamily: 'font2',
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => Signupscreen()),
+                          );
+                        },
+                        child: Text(
+                          'Have not account?SignUp',
+                          style: TextStyle(
+                            color: Colors.black54,
+                            fontFamily: 'font2',
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+#AdminDashboard.dart
+import 'package:flutter/material.dart';
+import 'package:schoolapp/loginscreen.dart';
+import 'package:schoolapp/student.dart';
+import 'package:schoolapp/teacher.dart';
+class Admin extends StatelessWidget {
+  const Admin({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => Loginscreen()),
+            );
+          },
+          icon: Icon(Icons.arrow_back_ios),
+        ),
+        backgroundColor: Colors.green.shade200,
+        title: Center(
+          child: Text(
+            'Admin panel',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontFamily: 'font2',
+              fontSize: 25,
+            ),
+          ),
+        ),
+      ),
+      body: Container(
+        color: Colors.white60,
+        width: double.infinity,
+        height: double.infinity,
+        child: Column(
+          children: [
+            SizedBox(height: 10),
+            Expanded(
+              child: GridView.count(
+                crossAxisCount: 2,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+                padding: EdgeInsets.all(15),
+                children: [
+                  Card(
+                    color: Colors.green.shade50,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => Student(),
+                              ),
+                            );
+                          },
+                          icon: Icon(
+                            Icons.people_alt,
+                            color: Colors.black,
+                            size: 50,
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          'Students',
+                          style: TextStyle(
+                            fontFamily: 'font2',
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Card(
+                    color: Colors.green.shade50,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => Teacher(),
+                              ),
+                            );
+                          },
+                          icon: Icon(
+                            Icons.perm_identity,
+                            color: Colors.black,
+                            size: 50,
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          'Teachers',
+                          style: TextStyle(
+                            fontFamily: 'font2',
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+#Student.dart
+import 'package:flutter/material.dart';
+import 'package:schoolapp/admin.dart';
+import 'package:schoolapp/studentrecord.dart';
+import 'package:schoolapp/updatestudent.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+class Student extends StatefulWidget {
+  const Student({super.key});
+  @override
+  State<Student> createState() => _StudentState();
+}
+class _StudentState extends State<Student> {
+  final selectresult = Supabase.instance.client;
+  List<Map<String, dynamic>> Myrecord = [];
+  FetchData() async {
+    try {
+      final selectedrecord = await selectresult.from('student').select();
+      Myrecord = selectedrecord;
+    } catch (e) {}
+  }
+  @override
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    FetchData();
+  }
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Admin()),
+              );
+            },
+            icon: Icon(Icons.arrow_back),
+          ),
+          title: Center(
+            child: Text(
+              'Student List',
+              style: TextStyle(
+                fontFamily: 'font2',
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          backgroundColor: Colors.green.shade200,
+        ),
+
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: Colors.black26,
+          onPressed: () {
+            setState(() {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Studentrecord()),
+              );
+              if (selectresult == true) {
+                FetchData();
+              }
+            });
+          },
+          child: Icon(Icons.add, color: Color(0xffFFF4CC)),
+        ),
+        backgroundColor: Colors.white,
+        body: ListView.builder(
+          itemCount: Myrecord.length,
+          itemBuilder: (context, index) {
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Updaterecord(Myrecord[index]),
+                    ),
+                  );
+                });
+              },
+              child: Card(
+                color: Colors.green.shade50,
+                margin: EdgeInsets.all(20),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadiusGeometry.circular(15),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: Colors.black26,
+                        radius: 30,
+                        child: Icon(
+                          Icons.person_3,
+                          size: 40,
+                          color: Colors.white60,
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Name:',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                  fontFamily: 'font2',
+                                ),
+                              ),
+                              SizedBox(width: 10),
+                              Text(
+                                Myrecord[index]['Name'],
+                                style: TextStyle(
+                                  fontFamily: 'font2',
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                'RollNo:',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                  fontFamily: 'font2',
+                                ),
+                              ),
+                              SizedBox(width: 10),
+                              Text(
+                                Myrecord[index]['RollNo'],
+                                style: TextStyle(
+                                  fontFamily: 'font2',
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                'Class:',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                  fontFamily: 'font2',
+                                ),
+                              ),
+                              SizedBox(width: 10),
+                              Text(
+                                Myrecord[index]['Class'],
+                                style: TextStyle(
+                                  fontFamily: 'font2',
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                'Phone:',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                  fontFamily: 'font2',
+                                ),
+                              ),
+                              SizedBox(width: 10),
+                              Text(
+                                Myrecord[index]['Phone'],
+                                style: TextStyle(
+                                  fontFamily: 'font2',
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+
+                        ],
+                      ),
+                      SizedBox(width: 10),
+                      IconButton(
+                        onPressed: () async {
+                          await selectresult
+                              .from('student')
+                              .delete()
+                              .eq('id', Myrecord[index]['id']);
+                        },
+                        icon: Icon(
+                          Icons.delete_outline_rounded,
+                          size: 25,
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+#Teacher.dart
+import 'package:flutter/material.dart';
+import 'package:schoolapp/addteacher.dart';
+import 'package:schoolapp/admin.dart';
+import 'package:schoolapp/updateteacher.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+class Teacher extends StatefulWidget {
+  const Teacher({super.key});
+  @override
+  State<Teacher> createState() => _TeacherState();
+}
+class _TeacherState extends State<Teacher> {
+  final selectresult = Supabase.instance.client;
+  List<Map<String, dynamic>> Myrecord = [];
+  FetchData() async {
+    try {
+      final selectedrecord = await selectresult.from('teacher').select();
+      Myrecord = selectedrecord;
+    } catch (e) {}
+  }
+  @override
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    FetchData();
+  }
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Admin()),
+              );
+            },
+            icon: Icon(Icons.arrow_back),
+          ),
+          title: Center(
+            child: Text(
+              'Teachers List',
+              style: TextStyle(
+                fontFamily: 'font2',
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          backgroundColor: Colors.green.shade100,
+        ),
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: Colors.black26,
+          onPressed: () {
+            setState(() {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Teacherrecord()),
+              );
+            });
+          },
+          child: Icon(Icons.add, color: Color(0xffFFF4CC)),
+        ),
+        backgroundColor: Colors.white,
+       
+        body: ListView.builder(
+          itemCount: Myrecord.length,
+          itemBuilder: (context, index) {
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Updateteacher(Myrecord[index]),
+                    ),
+                  );
+                });
+              },
+              child: Card(
+                color: Colors.green.shade50,
+                margin: EdgeInsets.all(10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadiusGeometry.circular(15),
+                ),
+                elevation: 5,
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: Colors.black26,
+                        radius: 30,
+                        child: Icon(
+                          Icons.person_3,
+                          size: 40,
+                          color: Colors.white60,
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Name:',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                  fontFamily: 'font2',
+                                ),
+                              ),
+                              SizedBox(width: 10),
+                              Text(
+                                Myrecord[index]['Name'],
+                                style: TextStyle(
+                                  fontFamily: 'font2',
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                'subject:',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                  fontFamily: 'font2',
+                                ),
+                              ),
+                              SizedBox(width: 10),
+                              Text(
+                                Myrecord[index]['subject'],
+                                style: TextStyle(
+                                  fontFamily: 'font2',
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                'Education:',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                  fontFamily: 'font2',
+                                ),
+                              ),
+                              SizedBox(width: 10),
+                              Text(
+                                Myrecord[index]['Qualification'],
+                                style: TextStyle(
+                                  fontFamily: 'font2',
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                'Phone:',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                  fontFamily: 'font2',
+                                ),
+                              ),
+                              SizedBox(width: 10),
+                              Text(
+                                Myrecord[index]['Phone'],
+                                style: TextStyle(
+                                  fontFamily: 'font2',
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      SizedBox(width: 10),
+                      IconButton(
+                        onPressed: () async {
+                          await selectresult
+                              .from('teacher')
+                              .delete()
+                              .eq('id', Myrecord[index]['id']);
+                        },
+                        icon: Icon(
+                          Icons.delete_outline_rounded,
+                          size: 25,
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+ #AddStudentRecord
+import 'package:flutter/material.dart';
+import 'package:schoolapp/student.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+class Studentrecord extends StatefulWidget {
+  const Studentrecord({super.key});
+  @override
+  State<Studentrecord> createState() => _StudentrecordState();
+}
+class _StudentrecordState extends State<Studentrecord> {
+  final NameText = TextEditingController();
+  final RollNoText = TextEditingController();
+  final ClassText = TextEditingController();
+  final PhoneText = TextEditingController();
+  bool Flag = false;
+  final insertData = Supabase.instance.client;
+  Saverecord_function() async {
+    setState(() {
+      Flag = true;
+    });
+    try {
+      await insertData.from('student').insert({
+        'Name': NameText.text,
+        'RollNo': RollNoText.text,
+        'Class': ClassText.text,
+        'Phone': PhoneText.text,
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Added Succesfully!!'),
+          duration: Duration(seconds: 10),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          duration: Duration(seconds: 10),
+          backgroundColor: Colors.red,
+        ),
+      );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => Studentrecord()),
+      );
+    } finally {
+      Flag = false;
+    }
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Center(
+          child: Text(
+            'Add Student Record',
+            style: TextStyle(
+              fontSize: 20,
+              fontFamily: 'font2',
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        backgroundColor: Colors.green.shade200,
+      ),
+      backgroundColor: Colors.green.shade100,
+      body: SingleChildScrollView(
+        child: Center(
+          child: Container(
+            height: MediaQuery.sizeOf(context).height * 0.7,
+            width: MediaQuery.sizeOf(context).width * 0.85,
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white54,
+              borderRadius: BorderRadius.circular(40),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Student Information',
+                  style: TextStyle(fontSize: 20, fontFamily: 'font2'),
+                ),
+                SizedBox(height: 20),
+                TextField(
+                  controller: NameText,
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(Icons.person),
+                    hintText: 'Your Name',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  style: TextStyle(fontFamily: 'font2', fontSize: 18),
+                ),
+                SizedBox(height: 20),
+                TextField(
+                  controller: RollNoText,
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(Icons.badge_outlined),
+                    hintText: 'Your Rollno',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  style: TextStyle(fontFamily: 'font2', fontSize: 18),
+                ),
+                SizedBox(height: 20),
+                TextField(
+                  controller: PhoneText,
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(Icons.phone),
+                    hintText: 'Your Phone',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  style: TextStyle(fontFamily: 'font2'),
+                ),
+                SizedBox(height: 20),
+                TextField(
+                  controller: ClassText,
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(Icons.class_outlined),
+                    hintText: 'Your Class',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  style: TextStyle(fontFamily: 'font2', fontSize: 18),
+                ),
+                SizedBox(height: 20),
+                Flag
+                    ? Center(child: CircularProgressIndicator())
+                    : ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            Saverecord_function();
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => Student(),
+                              ),
+                            );
+                          });
+                        },
+                        child: Text(
+                          'Save',
+                          style: TextStyle(
+                            fontSize: 25,
+                            fontFamily: 'font2',
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+#AddTeacherRecord
+import 'package:flutter/material.dart';
+import 'package:schoolapp/student.dart';
+import 'package:schoolapp/teacher.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+class Teacherrecord extends StatefulWidget {
+  const Teacherrecord({super.key});
+  @override
+  State<Teacherrecord> createState() => _TeacherrecordState();
+}
+class _TeacherrecordState extends State<Teacherrecord> {
+  final NameText = TextEditingController();
+  final PhoneText = TextEditingController();
+  final subjectText = TextEditingController();
+  final QualificationText = TextEditingController();
+  bool Flag = false;
+  final insertData = Supabase.instance.client;
+  Saverecord_function() async {
+    setState(() {
+      Flag = true;
+    });
+    try {
+      await insertData.from('teacher').insert({
+        'Name': NameText.text,
+        'Phone': PhoneText.text,
+        'subject': subjectText.text,
+        'Qualification': QualificationText.text,
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Added Succesfully!!'),
+          duration: Duration(seconds: 10),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          duration: Duration(seconds: 10),
+          backgroundColor: Colors.red,
+        ),
+      );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => Teacher()),
+      );
+    } finally {
+      Flag = false;
+    }
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Center(
+          child: Text(
+            'Add Teacher Record',
+            style: TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'font2',
+            ),
+          ),
+        ),
+        backgroundColor: Colors.green.shade200,
+      ),
+      backgroundColor: Colors.green.shade100,
+      body: SingleChildScrollView(
+        child: Center(
+          child: Container(
+            height: MediaQuery.sizeOf(context).height * 0.7,
+            width: MediaQuery.sizeOf(context).width * 0.85,
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white54,
+              borderRadius: BorderRadius.circular(40),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Teacher Information',
+                  style: TextStyle(fontSize: 20, fontFamily: 'font2'),
+                ),
+                SizedBox(height: 20),
+                TextField(
+                  controller: NameText,
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(Icons.person),
+                    hintText: 'Teacher Name',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  style: TextStyle(fontFamily: 'font2', fontSize: 18),
+                ),
+                SizedBox(height: 20),
+                TextField(
+                  controller: PhoneText,
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(Icons.book_outlined),
+                    hintText: 'Phone Number',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  style: TextStyle(fontFamily: 'font2', fontSize: 18),
+                ),
+                SizedBox(height: 20),
+                TextField(
+                  controller: subjectText,
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(Icons.book),
+                    hintText: 'Teacher`s Subject',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  style: TextStyle(fontFamily: 'font'),
+                ),
+                SizedBox(height: 20),
+                TextField(
+                  controller: QualificationText,
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(Icons.cast_for_education),
+                    hintText: 'Teacher`s Education',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  style: TextStyle(fontFamily: 'font2', fontSize: 18),
+                ),
+                SizedBox(height: 20),
+                Flag
+                    ? Center(child: CircularProgressIndicator())
+                    : ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            Saverecord_function();
+                            Navigator.pop(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => Teacher(),
+                              ),
+                            );
+                          });
+                        },
+                        child: Text(
+                          'Save',
+                          style: TextStyle(
+                            fontSize: 25,
+                            fontFamily: 'font2',
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+#UpdateStudent.dart
+
+import 'package:flutter/material.dart';
+import 'package:schoolapp/student.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+class Updaterecord extends StatefulWidget {
+  final Map<String,dynamic>SelectedNode;
+  Updaterecord(this.SelectedNode);
+  @override
+  State<Updaterecord> createState() => _UpdaterecordState();
+}
+class _UpdaterecordState extends State<Updaterecord> {
+  final NameText=TextEditingController();
+  final RollNoText=TextEditingController();
+  final ClassText=TextEditingController();
+  final PhoneText=TextEditingController();
+  bool Flag=false;
+  final insertData= Supabase.instance.client;
+  Editrecord_function()async{
+    setState(() {
+      Flag=true;
+    });
+    try{
+      await insertData.from('student').update({
+        'Name':NameText.text,
+        'RollNo':ClassText.text,
+        'Class':ClassText.text,
+        'Phone':PhoneText.text,
+      }).eq('id', widget.SelectedNode['id']);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Added Succesfully!!'),
+        duration: Duration(seconds: 10),
+        backgroundColor: Colors.green,
+      ));
+    }
+    catch(e){
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()),
+        duration: Duration(seconds: 10),
+        backgroundColor: Colors.red,
+      ));
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Student()));
+    }finally{Flag=false;}
+  }
+ @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    NameText.text= widget.SelectedNode['Name'];
+    RollNoText.text= widget.SelectedNode['RollNo'];
+    ClassText.text= widget.SelectedNode['Class'];
+    PhoneText.text= widget.SelectedNode['Phone'];
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Center(child: Text('Update Student Record',style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,fontFamily: 'font2'),)),
+        backgroundColor: Colors.green.shade200,),
+      backgroundColor: Colors.green.shade100,
+      body: SingleChildScrollView(
+        child: Center(
+          child: Container(
+            height: MediaQuery.sizeOf(context).height*0.7,
+            width: MediaQuery.sizeOf(context).width*0.85,
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color:Colors.white54,
+              borderRadius: BorderRadius.circular(40,),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Update Information',style:TextStyle(fontSize: 20,fontFamily: 'font2') ,),
+                SizedBox(height: 20,),
+                TextField(
+                  controller: NameText,
+                  decoration: InputDecoration(prefixIcon: Icon(Icons.person),hintText: 'Your Name',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      )),
+                  style: TextStyle(fontFamily: 'font2',fontSize: 18),
+                ),
+                SizedBox(height: 20,),
+                TextField(
+                  controller: RollNoText,
+                  decoration: InputDecoration(
+        
+                      prefixIcon: Icon(Icons.badge_outlined),
+                      hintText: 'Your Rollno',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      )),
+                  style: TextStyle(fontFamily: 'font2',fontSize: 18),                    ),
+                SizedBox(height: 20,),
+                TextField(
+                  controller: PhoneText,
+                  decoration: InputDecoration(prefixIcon: Icon(Icons.phone),hintText: 'Your Phone',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      )),
+                  style: TextStyle(fontFamily: 'font'),
+                ),
+                SizedBox(height: 20,),
+                TextField(
+                  controller: ClassText,
+                  decoration: InputDecoration(prefixIcon: Icon(Icons.class_outlined),hintText: 'Your Class',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      )),
+                  style: TextStyle(fontFamily: 'font2',fontSize: 18),
+                ),
+                SizedBox(height: 20,),
+                Flag?Center(child: CircularProgressIndicator(),):ElevatedButton(onPressed:(){
+                  setState(() {
+                    Editrecord_function();
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context)=>Student()));
+        
+                  });
+                }, child: Text('Update',style: TextStyle(fontSize: 25,fontFamily: 'font2',color: Colors.black),))
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+
+  }
+}
+
+#UpdateTecher.dart
+import 'package:flutter/material.dart';
+import 'package:schoolapp/teacher.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+class Updateteacher extends StatefulWidget {
+  final Map<String,dynamic>SelectedNode;
+  Updateteacher(this.SelectedNode);
+  @override
+  State<Updateteacher> createState() => _UpdateteacherState();
+}
+class _UpdateteacherState extends State<Updateteacher> {
+  final NameText=TextEditingController();
+  final subjectText=TextEditingController();
+  final QualificationText=TextEditingController();
+  final PhoneText=TextEditingController();
+  bool Flag=false;
+  final insertData= Supabase.instance.client;
+  Editrecord_function()async{
+    setState(() {
+      Flag=true;
+    });
+    try{
+      await insertData.from('teacher').update({
+        'Name':NameText.text,
+        'subject':subjectText.text,
+        'Qualification':QualificationText.text,
+        'Phone':PhoneText.text,
+      }).eq('id', widget.SelectedNode['id']);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Updated Succesfully!!'),
+        duration: Duration(seconds: 10),
+        backgroundColor: Colors.green,
+      ));
+    }
+    catch(e){
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()),
+        duration: Duration(seconds: 10),
+        backgroundColor: Colors.red,
+      ));
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Teacher()));
+    }finally{Flag=false;}
+  }
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    NameText.text= widget.SelectedNode['Name'];
+    subjectText.text= widget.SelectedNode['subject'];
+    QualificationText.text= widget.SelectedNode['Qualification'];
+    PhoneText.text= widget.SelectedNode['Phone'];
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Center(child: Text('Update Teacher Record',style: TextStyle(fontSize: 20,fontFamily: 'font2'),)),
+        backgroundColor: Colors.green.shade200,),
+      backgroundColor: Colors.green.shade100,
+      body: SingleChildScrollView(
+        child: Center(
+          child: Container(
+            height: MediaQuery.sizeOf(context).height*0.7,
+            width: MediaQuery.sizeOf(context).width*0.85,
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color:Colors.white54,
+              borderRadius: BorderRadius.circular(40,),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Update Information',style:TextStyle(fontSize: 20,fontFamily: 'font2') ,),
+                SizedBox(height: 20,),
+                TextField(
+                  controller: NameText,
+                  decoration: InputDecoration(prefixIcon: Icon(Icons.person),hintText: 'Teacher Name',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      )),
+                  style: TextStyle(fontFamily: 'font2',fontSize: 18),
+                ),
+                SizedBox(height: 20,),
+                TextField(
+                  controller: subjectText,
+                  decoration: InputDecoration(
+        
+                      prefixIcon: Icon(Icons.book_outlined),
+                      hintText: 'Teacher`s Subject',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      )),
+                  style: TextStyle(fontFamily: 'font2',fontSize: 18),                    ),
+                SizedBox(height: 20,),
+                TextField(
+                  controller: QualificationText,
+                  decoration: InputDecoration(prefixIcon: Icon(Icons.cast_for_education),hintText: 'Education',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      )),
+                  style: TextStyle(fontFamily: 'font'),
+                ),
+                SizedBox(height: 20,),
+                TextField(
+                  controller: PhoneText,
+                  decoration: InputDecoration(prefixIcon: Icon(Icons.phone),hintText: 'Contact Number',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      )),
+                  style: TextStyle(fontFamily: 'font2',fontSize: 18),
+                ),
+                SizedBox(height: 20,),
+                Flag?Center(child: CircularProgressIndicator(),):ElevatedButton(
+        
+                    onPressed:(){
+                  setState(() {
+                    Editrecord_function();
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context)=>Teacher()));
+                  });
+                }, child: Text('Update',style: TextStyle(fontSize: 25,fontFamily: 'font2',color: Colors.black),))
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+
+  }
+}
+
+#Homescreen.dart
+import 'package:flutter/material.dart';
+import 'package:schoolapp/feescreen.dart';
+import 'package:schoolapp/hello.dart';
+import 'package:schoolapp/loginscreen.dart';
+import 'package:schoolapp/studnetshow.dart';
+import 'package:schoolapp/timetable.dart';
+class Homescreen extends StatefulWidget {
+  const Homescreen({super.key});
+  @override
+  State<Homescreen> createState() => _HomescreenState();
+}
+class _HomescreenState extends State<Homescreen> {
+  String userRole = '';
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        backgroundColor: Colors.green.shade200,
+        appBar: AppBar(
+          backgroundColor: Colors.black12,
+          leading: Icon(Icons.school_outlined, color: Colors.black, size: 35),
+          title: Text(
+            'The Smart School',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 25,
+              fontFamily: 'font2',
+              color: Colors.black,
+            ),
+          ),
+        ),
+        body: Container(
+          color: Colors.white,
+          width: double.infinity,
+          height: double.infinity,
+          child: Column(
+            children: [
+              SizedBox(height: 10),
+              Text(
+                'Welcome to Future of ',
+                style: TextStyle(fontFamily: 'font2', fontSize: 25),
+              ),
+              Text(
+                'Education',
+                style: TextStyle(fontFamily: 'font2', fontSize: 25),
+              ),
+              SizedBox(height: 10),
+              Expanded(
+                child: GridView.count(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 10,
+                  crossAxisSpacing: 10,
+                  padding: EdgeInsets.all(15),
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        setState(() {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Studentshow(),
+                            ),
+                          );
+                        });
+                      },
+                      child: Card(
+                        color: Colors.green.shade100,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.people_alt,
+                              color: Colors.black,
+                              size: 50,
+                            ),
+                            SizedBox(height: 10),
+                            Text(
+                              'Students',
+                              style: TextStyle(
+                                fontFamily: 'font2',
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        setState(() {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Teachershow(),
+                            ),
+                          );
+                        });
+                      },
+                      child: Card(
+                        color: Colors.green.shade100,
+
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.perm_identity,
+                              color: Colors.black,
+                              size: 50,
+                            ),
+                            SizedBox(height: 10),
+                            Text(
+                              'Teachers',
+                              style: TextStyle(
+                                fontFamily: 'font2',
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        setState(() {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => TimetableScreen(),
+                            ),
+                          );
+                        });
+                      },
+                      child: Card(
+                        color: Colors.green.shade100,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.access_time_outlined,
+                              color: Colors.black,
+                              size: 50,
+                            ),
+                            SizedBox(height: 10),
+                            Text(
+                              'Time Table',
+                              style: TextStyle(
+                                fontFamily: 'font2',
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        setState(() {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Feescreen(),
+                            ),
+                          );
+                        });
+                      },
+                      child: Card(
+                        color: Colors.green.shade100,
+                        child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.wallet, color: Colors.black, size: 50),
+                            SizedBox(height: 10),
+                            Text(
+                              'Fee',
+                              style: TextStyle(
+                                fontFamily: 'font2',
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green.shade100,
+                  ),
+                  onPressed:(){
+                setState(() {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context)=>Loginscreen()));
+
+                });
+              }, child: Text('Logout',style: TextStyle(fontSize: 25,fontFamily: 'font2',color: Colors.black),))
+            ],
+          ),
+        ),
+
+      ),
+    );
+  }
+}
+
+#StudentShow.dart
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+class Studentshow extends StatefulWidget {
+  const Studentshow({super.key});
+  @override
+  State<Studentshow> createState() => _StudentshowState();
+}
+class _StudentshowState extends State<Studentshow> {
+  final supabase = Supabase.instance.client;
+  List data = [];
+  Future fetchData() async {
+    final response = await supabase.from('student').select();
+    setState(() {
+      data = response;
+    });
+  }
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.green.shade200,
+        title: Center(
+          child: Text(
+            "Students Record",
+            style: TextStyle(
+              fontFamily: 'font2',
+              fontWeight: FontWeight.bold,
+              fontSize: 25,
+            ),
+          ),
+        ),
+      ),
+      body: data.isEmpty
+          ? Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              itemCount: data.length,
+
+              itemBuilder: (context, index) {
+                return Card(
+                  color: Colors.green.shade50,
+                  margin: EdgeInsets.all(20),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadiusGeometry.circular(15),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: Colors.black26,
+                          radius: 30,
+                          child: Icon(
+                            Icons.person_3,
+                            size: 40,
+                            color: Colors.white60,
+                          ),
+                        ),
+                        SizedBox(width: 10),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Name:',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                    fontFamily: 'font2',
+                                  ),
+                                ),
+                                SizedBox(width: 10),
+                                Text(
+                                  data[index]['Name'].toString(),
+                                  style: TextStyle(
+                                    fontFamily: 'font2',
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  'RollNO:',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                    fontFamily: 'font2',
+                                  ),
+                                ),
+                                SizedBox(width: 10),
+                                Text(
+                                  data[index]['RollNo'].toString(),
+                                  style: TextStyle(
+                                    fontFamily: 'font2',
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  'Class:',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                    fontFamily: 'font2',
+                                  ),
+                                ),
+                                SizedBox(width: 10),
+                                Text(
+                                  data[index]['Class'].toString(),
+                                  style: TextStyle(
+                                    fontFamily: 'font2',
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  'Phone:',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                    fontFamily: 'font2',
+                                  ),
+                                ),
+                                SizedBox(width: 10),
+                                Text(
+                                  data[index]['Phone'].toString(),
+                                  style: TextStyle(
+                                    fontFamily: 'font2',
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        SizedBox(width: 10),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+    );
+  }
+}
+
+#TeacherShow.dart
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+class Teachershow extends StatefulWidget {
+  const Teachershow({super.key});
+  @override
+  State<Teachershow> createState() => _TeachershowState();
+}
+class _TeachershowState extends State<Teachershow> {
+  final supabase = Supabase.instance.client;
+  List data = [];
+  Future fetchData() async {
+    final response = await supabase.from('teacher').select();
+    setState(() {
+      data = response;
+    });
+  }
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.green.shade200,
+        title: Center(
+          child: Text(
+            "Teachers Record",
+            style: TextStyle(
+              fontFamily: 'font2',
+              fontWeight: FontWeight.bold,
+              fontSize: 25,
+            ),
+          ),
+        ),
+      ),
+      body: data.isEmpty
+          ? Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              itemCount: data.length,
+              itemBuilder: (context, index) {
+                return Card(
+                  color: Colors.green.shade50,
+                  margin: EdgeInsets.all(20),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadiusGeometry.circular(15),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: Colors.black26,
+                          radius: 30,
+                          child: Icon(
+                            Icons.person_3,
+                            size: 40,
+                            color: Colors.white60,
+                          ),
+                        ),
+                        SizedBox(width: 10),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Name:',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                    fontFamily: 'font2',
+                                  ),
+                                ),
+                                SizedBox(width: 10),
+                                Text(
+                                  data[index]['Name'].toString(),
+                                  style: TextStyle(
+                                    fontFamily: 'font2',
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  'subject:',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                    fontFamily: 'font2',
+                                  ),
+                                ),
+                                SizedBox(width: 10),
+                                Text(
+                                  data[index]['subject'].toString(),
+                                  style: TextStyle(
+                                    fontFamily: 'font2',
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  'Education:',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                    fontFamily: 'font2',
+                                  ),
+                                ),
+                                SizedBox(width: 10),
+                                Text(
+                                  data[index]['Qualification'].toString(),
+                                  style: TextStyle(
+                                    fontFamily: 'font2',
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  'Phone:',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                    fontFamily: 'font2',
+                                  ),
+                                ),
+                                SizedBox(width: 10),
+                                Text(
+                                  data[index]['Phone'].toString(),
+                                  style: TextStyle(
+                                    fontFamily: 'font2',
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            // SizedBox(width: 15,),
+                          ],
+                        ),
+                        SizedBox(width: 10),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+    );
+  }
+}
+
+#FeeScreen.dart
+import 'package:flutter/material.dart';
+class Feescreen extends StatelessWidget {
+  const Feescreen({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          backgroundColor: Colors.green.shade200,
+          title: Center(child: Text(
+            'Fee Details',style: TextStyle(fontSize: 25,fontFamily: 'font2',fontWeight: FontWeight.bold),)),
+        ),
+        body: ListView(
+            children: [
+              SizedBox(height: 20,),
+              Card(
+                color: Colors.green.shade50,
+                margin: EdgeInsets.all(15),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(10)),
+                child: Padding(
+                  padding: const EdgeInsets.all(15),
+                  child: Column(
+
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.class_outlined,),
+                          Text('Class 1',style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold,fontFamily: 'font2',color: Colors.black),),
+                        ],),
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          Text('Fee=1,000',style: TextStyle(fontSize: 18,fontFamily: 'font2',color: Colors.black),),],),
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          Text('Paper Fund=500',style: TextStyle(fontSize: 18,fontFamily: 'font2',color: Colors.black),),
+
+                        ],),
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          Text('Total Dues=1500',style: TextStyle(fontSize: 18,fontFamily: 'font2',color: Colors.black),),
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ),
+              Card(
+                color: Colors.green.shade50,
+                margin: EdgeInsets.all(15),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(10)),
+                child: Padding(
+                  padding: const EdgeInsets.all(15),
+                  child: Column(
+
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.class_outlined,),
+                          Text('Class 2',style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold,fontFamily: 'font2',color: Colors.black),),
+                        ],),
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          Text('Fee=1,000',style: TextStyle(fontSize: 18,fontFamily: 'font2',color: Colors.black),),],),
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          Text('Paper Fund=500',style: TextStyle(fontSize: 18,fontFamily: 'font2',color: Colors.black),),
+
+                        ],),
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          Text('Total Dues=1500',style: TextStyle(fontSize: 18,fontFamily: 'font2',color: Colors.black),),
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ),
+              Card(
+                color: Colors.green.shade50,
+                margin: EdgeInsets.all(15),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(10)),
+                child: Padding(
+                  padding: const EdgeInsets.all(15),
+                  child: Column(
+
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.class_outlined,),
+                          Text('Class 3rd',style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold,fontFamily: 'font2',color: Colors.black),),
+                        ],),
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          Text('Fee=1200',style: TextStyle(fontSize: 18,fontFamily: 'font2',color: Colors.black),),],),
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          Text('Paper Fund=800',style: TextStyle(fontSize: 18,fontFamily: 'font2',color: Colors.black),),
+
+                        ],),
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          Text('Total Dues=2,000',style: TextStyle(fontSize: 18,fontFamily: 'font2',color: Colors.black),),
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ),
+              Card(
+                color: Colors.green.shade50,
+                margin: EdgeInsets.all(15),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(10)),
+                child: Padding(
+                  padding: const EdgeInsets.all(15),
+                  child: Column(
+
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.class_outlined,),
+                          Text('Class 4th',style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold,fontFamily: 'font2',color: Colors.black),),
+                        ],),
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          Text('Fee=1200',style: TextStyle(fontSize: 18,fontFamily: 'font2',color: Colors.black),),],),
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          Text('Paper Fund=800',style: TextStyle(fontSize: 18,fontFamily: 'font2',color: Colors.black),),
+
+                        ],),
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          Text('Total Dues=2,000',style: TextStyle(fontSize: 18,fontFamily: 'font2',color: Colors.black),),
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ),
+              Card(
+                color: Colors.green.shade50,
+                margin: EdgeInsets.all(15),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(10)),
+                child: Padding(
+                  padding: const EdgeInsets.all(15),
+                  child: Column(
+
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.class_outlined,),
+                          Text('Class 5',style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold,fontFamily: 'font2',color: Colors.black),),
+                        ],),
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          Text('Fee=1500',style: TextStyle(fontSize: 18,fontFamily: 'font2',color: Colors.black),),],),
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          Text('Paper Fund=500',style: TextStyle(fontSize: 18,fontFamily: 'font2',color: Colors.black),),
+
+                        ],),
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          Text('Total Dues=2500',style: TextStyle(fontSize: 18,fontFamily: 'font2',color: Colors.black),),
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ),
+              Card(
+                color: Colors.green.shade50,
+                margin: EdgeInsets.all(15),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(10)),
+                child: Padding(
+                  padding: const EdgeInsets.all(15),
+                  child: Column(
+
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.class_outlined,),
+                          Text('Class 6',style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold,fontFamily: 'font2',color: Colors.black),),
+                        ],),
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          Text('Fee=1500',style: TextStyle(fontSize: 18,fontFamily: 'font2',color: Colors.black),),],),
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          Text('Paper Fund=500',style: TextStyle(fontSize: 18,fontFamily: 'font2',color: Colors.black),),
+
+                        ],),
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          Text('Total Dues=2500',style: TextStyle(fontSize: 18,fontFamily: 'font2',color: Colors.black),),
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ),
+              Card(
+                color: Colors.green.shade50,
+                margin: EdgeInsets.all(15),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(10)),
+                child: Padding(
+                  padding: const EdgeInsets.all(15),
+                  child: Column(
+
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.class_outlined,),
+                          Text('Class 7',style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold,fontFamily: 'font2',color: Colors.black),),
+                        ],),
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          Text('Fee=2000',style: TextStyle(fontSize: 18,fontFamily: 'font2',color: Colors.black),),],),
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          Text('Paper Fund=1000',style: TextStyle(fontSize: 18,fontFamily: 'font2',color: Colors.black),),
+
+                        ],),
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          Text('Total Dues =3000',style: TextStyle(fontSize: 18,fontFamily: 'font2',color: Colors.black),),
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ),
+              Card(
+                color: Colors.green.shade50,
+                margin: EdgeInsets.all(15),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(10)),
+                child: Padding(
+                  padding: const EdgeInsets.all(15),
+                  child: Column(
+
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.class_outlined,),
+                          Text('Class 8th',style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold,fontFamily: 'font2',color: Colors.black),),
+                        ],),
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          Text('Fee=2000',style: TextStyle(fontSize: 18,fontFamily: 'font2',color: Colors.black),),],),
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          Text('Paper Fund=1000',style: TextStyle(fontSize: 18,fontFamily: 'font2',color: Colors.black),),
+
+                        ],),
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          Text('Total Dues = 3000',style: TextStyle(fontSize: 18,fontFamily: 'font2',color: Colors.black),),
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ),
+              Card(
+                color: Colors.green.shade50,
+                margin: EdgeInsets.all(15),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(10)),
+                child: Padding(
+                  padding: const EdgeInsets.all(15),
+                  child: Column(
+
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.class_outlined,),
+                          Text('Class 9',style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold,fontFamily: 'font2',color: Colors.black),),
+                        ],),
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          Text('Fee = 2500',style: TextStyle(fontSize: 18,fontFamily: 'font2',color: Colors.black),),],),
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          Text('Paper Fund = 1000',style: TextStyle(fontSize: 18,fontFamily: 'font2',color: Colors.black),),
+
+                        ],),
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          Text('Total Dues = 3500',style: TextStyle(fontSize: 18,fontFamily: 'font2',color: Colors.black),),
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ),
+              Card(
+                color: Colors.green.shade50,
+                margin: EdgeInsets.all(15),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(10)),
+                child: Padding(
+                  padding: const EdgeInsets.all(15),
+                  child: Column(
+
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.class_outlined,),
+                          Center(child: Text('Class 10',style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold,fontFamily: 'font2',color: Colors.black),)),
+                        ],),
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          Text('Fee  =  35000',style: TextStyle(fontSize: 18,fontFamily: 'font2',color: Colors.black),),],),
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          Text('Paper Fund  =  1500',style: TextStyle(fontSize: 18,fontFamily: 'font2',color: Colors.black),),
+
+                        ],),
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          Text('Total Dues  =  5000',style: TextStyle(fontSize: 18,fontFamily: 'font2',color: Colors.black),),
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ]));
+  }
+}
+
+#TimeTable.dart
+import 'package:flutter/material.dart';
+class TimetableScreen extends StatelessWidget {
+  const TimetableScreen({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: Center(child: const Text("Time Table",style: TextStyle(fontFamily: 'font2',fontSize: 30,fontWeight: FontWeight.bold),)),
+        backgroundColor:Colors.green.shade200,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(15),
+        child: ListView(
+          children: [
+            Card(
+            color: Colors.green.shade50,
+        margin: EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadiusGeometry.circular(15)),
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.calendar_today),
+                  Text('Monday',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20,fontFamily: 'font2' ,),),
+                ],
+              ),
+              SizedBox(width: 30,),
+              Row(
+                children: [
+                  Text('English:',style: TextStyle(fontFamily: 'font2',fontSize: 18,fontWeight: FontWeight.bold),),
+                  SizedBox(width: 40,),
+                  Text('8.00am_9.00am',style: TextStyle(fontFamily: 'font2',fontSize: 15,),),
+                ],
+              ),
+              Row(
+                children: [
+                  Text('Math:',style: TextStyle(fontFamily: 'font2',fontSize: 18,fontWeight: FontWeight.bold),),
+                  SizedBox(width: 50,),
+                  Text('  9.00am_10.00am',style: TextStyle(fontFamily: 'font2',fontSize: 15,),),
+                ],
+              ),
+              Row(
+                children: [
+                  Text('Urdu:',style: TextStyle(fontFamily: 'font2',fontSize: 18,fontWeight: FontWeight.bold),),
+                  SizedBox(width: 50,),
+                  Text('  10.00am_11.00am',style: TextStyle(fontFamily: 'font2',fontSize: 15,),),
+                ],
+              ),
+              Row(
+                children: [
+                  Text('Break:',style: TextStyle(fontFamily: 'font2',fontSize: 18,fontWeight: FontWeight.bold),),
+                  SizedBox(width: 55,),
+                  Text('11.00am_11.30am',style: TextStyle(fontFamily: 'font2',fontSize: 15,),),
+                ],
+              ),
+              Row(
+                children: [
+                  Text('Islamiyat:',style: TextStyle(fontFamily: 'font2',fontSize: 18,fontWeight: FontWeight.bold),),
+                  SizedBox(width: 15,),
+                  Text('11.30am_12.30pm',style: TextStyle(fontFamily: 'font2',fontSize: 15,),),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+            Card(
+              color: Colors.green.shade50,
+              margin: EdgeInsets.all(10),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadiusGeometry.circular(15)),
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.calendar_today),
+
+                        Text('Tuesday',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20,fontFamily: 'font2' ,),),
+                      ],
+                    ),
+                    SizedBox(width: 30,),
+                    Row(
+                      children: [
+                        Text('English:',style: TextStyle(fontFamily: 'font2',fontSize: 18,fontWeight: FontWeight.bold),),
+                        SizedBox(width: 40,),
+                        Text('8.00am_9.00am',style: TextStyle(fontFamily: 'font2',fontSize: 15,),),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Text('Math:',style: TextStyle(fontFamily: 'font2',fontSize: 18,fontWeight: FontWeight.bold),),
+                        SizedBox(width: 50,),
+                        Text('  9.00am_10.00am',style: TextStyle(fontFamily: 'font2',fontSize: 15,),),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Text('Urdu:',style: TextStyle(fontFamily: 'font2',fontSize: 18,fontWeight: FontWeight.bold),),
+                        SizedBox(width: 50,),
+                        Text('  10.00am_11.00am',style: TextStyle(fontFamily: 'font2',fontSize: 15,),),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Text('Break:',style: TextStyle(fontFamily: 'font2',fontSize: 18,fontWeight: FontWeight.bold),),
+                        SizedBox(width: 55,),
+                        Text('11.00am_11.30am',style: TextStyle(fontFamily: 'font2',fontSize: 15,),),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Text('Islamiyat:',style: TextStyle(fontFamily: 'font2',fontSize: 18,fontWeight: FontWeight.bold),),
+                        SizedBox(width: 15,),
+                        Text('11.30am_12.30pm',style: TextStyle(fontFamily: 'font2',fontSize: 15,),),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Card(
+              color: Colors.green.shade50,
+              margin: EdgeInsets.all(10),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadiusGeometry.circular(15)),
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.calendar_today),
+
+                        Text('Wednesday',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20,fontFamily: 'font2' ,),),
+                      ],
+                    ),
+
+                    SizedBox(width: 30,),
+                    Row(
+                      children: [
+                        Text('English:',style: TextStyle(fontFamily: 'font2',fontSize: 18,fontWeight: FontWeight.bold),),
+                        SizedBox(width: 40,),
+                        Text('8.00am_9.00am',style: TextStyle(fontFamily: 'font2',fontSize: 15,),),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Text('Math:',style: TextStyle(fontFamily: 'font2',fontSize: 18,fontWeight: FontWeight.bold),),
+                        SizedBox(width: 50,),
+                        Text('  9.00am_10.00am',style: TextStyle(fontFamily: 'font2',fontSize: 15,),),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Text('Urdu:',style: TextStyle(fontFamily: 'font2',fontSize: 18,fontWeight: FontWeight.bold),),
+                        SizedBox(width: 50,),
+                        Text('  10.00am_11.00am',style: TextStyle(fontFamily: 'font2',fontSize: 15,),),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Text('Break:',style: TextStyle(fontFamily: 'font2',fontSize: 18,fontWeight: FontWeight.bold),),
+                        SizedBox(width: 55,),
+                        Text('11.00am_11.30am',style: TextStyle(fontFamily: 'font2',fontSize: 15,),),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Text('Islamiyat:',style: TextStyle(fontFamily: 'font2',fontSize: 18,fontWeight: FontWeight.bold),),
+                        SizedBox(width: 15,),
+                        Text('11.30am_12.30pm',style: TextStyle(fontFamily: 'font2',fontSize: 15,),),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Card(
+              color: Colors.green.shade50,
+              margin: EdgeInsets.all(10),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadiusGeometry.circular(15)),
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.calendar_today),
+                        Text('Thursday',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20,fontFamily: 'font2' ,),),
+                      ],
+                    ),
+                    SizedBox(width: 30,),
+                    Row(
+                      children: [
+                        Text('English:',style: TextStyle(fontFamily: 'font2',fontSize: 18,fontWeight: FontWeight.bold),),
+                        SizedBox(width: 40,),
+                        Text('8.00am_9.00am',style: TextStyle(fontFamily: 'font2',fontSize: 15,),),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Text('Math:',style: TextStyle(fontFamily: 'font2',fontSize: 18,fontWeight: FontWeight.bold),),
+                        SizedBox(width: 50,),
+                        Text('  9.00am_10.00am',style: TextStyle(fontFamily: 'font2',fontSize: 15,),),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Text('Urdu:',style: TextStyle(fontFamily: 'font2',fontSize: 18,fontWeight: FontWeight.bold),),
+                        SizedBox(width: 50,),
+                        Text('  10.00am_11.00am',style: TextStyle(fontFamily: 'font2',fontSize: 15,),),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Text('Break:',style: TextStyle(fontFamily: 'font2',fontSize: 18,fontWeight: FontWeight.bold),),
+                        SizedBox(width: 55,),
+                        Text('11.00am_11.30am',style: TextStyle(fontFamily: 'font2',fontSize: 15,),),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Text('Islamiyat:',style: TextStyle(fontFamily: 'font2',fontSize: 18,fontWeight: FontWeight.bold),),
+                        SizedBox(width: 15,),
+                        Text('11.30am_12.30pm',style: TextStyle(fontFamily: 'font2',fontSize: 15,),),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Card(
+              color: Colors.green.shade50,
+              margin: EdgeInsets.all(10),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadiusGeometry.circular(15)),
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.calendar_today),
+                        Text('Friday',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20,fontFamily: 'font2' ,),),
+                      ],
+                    ),
+                    SizedBox(width: 30,),
+                    Row(
+                      children: [
+                        Text('English:',style: TextStyle(fontFamily: 'font2',fontSize: 18,fontWeight: FontWeight.bold),),
+                        SizedBox(width: 40,),
+                        Text('8.00am_9.00am',style: TextStyle(fontFamily: 'font2',fontSize: 15,),),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Text('Math:',style: TextStyle(fontFamily: 'font2',fontSize: 18,fontWeight: FontWeight.bold),),
+                        SizedBox(width: 50,),
+                        Text('  9.00am_10.00am',style: TextStyle(fontFamily: 'font2',fontSize: 15,),),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Text('Urdu:',style: TextStyle(fontFamily: 'font2',fontSize: 18,fontWeight: FontWeight.bold),),
+                        SizedBox(width: 50,),
+                        Text('  10.00am_11.00am',style: TextStyle(fontFamily: 'font2',fontSize: 15,),),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Text('Break:',style: TextStyle(fontFamily: 'font2',fontSize: 18,fontWeight: FontWeight.bold),),
+                        SizedBox(width: 55,),
+                        Text('11.00am_11.30am',style: TextStyle(fontFamily: 'font2',fontSize: 15,),),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Text('Islamiyat:',style: TextStyle(fontFamily: 'font2',fontSize: 18,fontWeight: FontWeight.bold),),
+                        SizedBox(width: 15,),
+                        Text('11.30am_12.30pm',style: TextStyle(fontFamily: 'font2',fontSize: 15,),),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+#Yamlfile
+name: schoolapp
+description: "A new Flutter project."
+# The following line prevents the package from being accidentally published to
+# pub.dev using `flutter pub publish`. This is preferred for private packages.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+# The following defines the version and build number for your application.
+# A version number is three numbers separated by dots, like 1.2.43
+# followed by an optional build number separated by a +.
+# Both the version and the builder number may be overridden in flutter
+# build by specifying --build-name and --build-number, respectively.
+# In Android, build-name is used as versionName while build-number used as versionCode.
+# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
+# In iOS, build-name is used as CFBundleShortVersionString while build-number is used as CFBundleVersion.
+# Read more about iOS versioning at
+# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
+# In Windows, build-name is used as the major, minor, and patch parts
+# of the product and file versions while build-number is used as the build suffix.
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.8
+
+# Dependencies specify other packages that your package needs in order to work.
+# To automatically upgrade your package dependencies to the latest versions
+# consider running `flutter pub upgrade --major-versions`. Alternatively,
+# dependencies can be manually updated by changing the version numbers below to
+# the latest version available on pub.dev. To see which dependencies have newer
+# versions available, run `flutter pub outdated`.
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  cupertino_icons: ^1.0.8
+  supabase_flutter: ^2.12.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # The "flutter_lints" package below contains a set of recommended lints to
+  # encourage good coding practices. The lint set provided by the package is
+  # activated in the `analysis_options.yaml` file located at the root of your
+  # package. See that file for information about deactivating specific lint
+  # rules and activating additional ones.
+  flutter_lints: ^6.0.0
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter packages.
+flutter:
+
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+  uses-material-design: true
+
+  # To add assets to your application, add an assets section, like this:
+  assets:
+    - assets/
+
+
+  # An image asset can refer to one or more resolution-specific "variants", see
+  # https://flutter.dev/to/resolution-aware-images
+
+  # For details regarding adding assets from package dependencies, see
+  # https://flutter.dev/to/asset-from-package
+
+  # To add custom fonts to your application, add a fonts section here,
+  # in this "flutter" section. Each entry in this list should have a
+  # "family" key with the font family name, and a "fonts" key with a
+  # list giving the asset and other descriptors for the font. For
+  # example:
+  fonts:
+    - family: font1
+      fonts:
+        - asset: fonts/LobsterTwo-Italic.ttf
+    - family: font2
+      fonts:
+        - asset: fonts/Lora-Italic-VariableFont_wght.ttf
+    - family: font3
+      fonts:
+        - asset: fonts/Lugrasimo-Regular.ttf
+  #
+  # For details regarding fonts from package dependencies,
+  # see https://flutter.dev/to/font-from-package
